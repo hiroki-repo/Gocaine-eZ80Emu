@@ -134,7 +134,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             }
         } else if ((flashaubr <= ((prm_0 >> 16) & 0xFF)) && (((flashaubr+3)&0xFF) >= ((prm_0 >> 16) & 0xFF)) && ((flashcr & 0x08) != 0)) {
 			externaltime += (flashcr >> 5);
-			if (fname4if == "") { return 0; }
+			if (&fname4if == NULL) { return 0; }
 			flashfdcrpt = fopen(fname4if,"rb+");
 			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 			fseek(flashfdcrpt,(prm_0 - (flashaubr << 16)),SEEK_SET);
