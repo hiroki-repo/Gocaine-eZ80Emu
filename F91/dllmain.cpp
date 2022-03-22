@@ -134,18 +134,19 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             }
         } else if ((flashaubr <= ((prm_0 >> 16) & 0xFF)) && (((flashaubr+3)&0xFF) >= ((prm_0 >> 16) & 0xFF)) && ((flashcr & 0x08) != 0)) {
 			externaltime += (flashcr >> 5);
-			if (&fname4if == NULL) { return 0; }
+			if ((&fname4if) == NULL) { return 0; }
 			flashfdcrpt = fopen(fname4if,"rb+");
 			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 			fseek(flashfdcrpt,(prm_0 - (flashaubr << 16)),SEEK_SET);
+			ret = 0;
 			switch (prm_2) {
 			case 0:
 				if (((flashwepr >> ((prm_0 - (flashaubr << 16)) >> 15))&1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); }
-				return 0;
 			case 1:
-				return fgetc(flashfdcrpt);
+				ret = fgetc(flashfdcrpt);
 			}
 			fclose(flashfdcrpt);
+			return ret;
 		}
 		else {
             return f91memaccess(prm_0, prm_1, prm_2);
@@ -196,7 +197,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			break;
 		case 0xf6:
 			externaltime += flashfdr;
-			if (fname4if == "") { return 0; }
+			if (&fname4if == NULL) { return 0; }
 			flashfdcrpt = fopen(fname4if, "rb+");
 			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 			if (&flashfdcrpt == 0) { return 0; }
@@ -292,7 +293,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 
 		case 0xf6:
 			externaltime += flashfdr;
-			if (fname4if == "") { return 0; }
+			if (&fname4if == NULL) { return 0; }
 			flashfdcrpt = fopen(fname4if, "rb+");
 			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 			if (&flashfdcrpt == 0) { return 0; }
