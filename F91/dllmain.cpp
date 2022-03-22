@@ -186,6 +186,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             break;
 
         case 0xbc:
+			if (&f91spiaccess == NULL) { return 0; }
             for (int i = 0; i < 8; i++) {
                 f91spiaccess(((prm_1 >> i)&1) ? true : false);
             }
