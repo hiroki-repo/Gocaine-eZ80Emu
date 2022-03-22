@@ -132,7 +132,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             case 1:
                 return intram4000h[prm_0 & 0x3FFF];
             }
-        } else if ((flashaubr >= ((prm_0 >> 16) & 0xFF)) && (((flashaubr+3)&0xFF) <= ((prm_0 >> 16) & 0xFF)) && ((flashcr & 0x08) != 0)) {
+        } else if ((flashaubr <= ((prm_0 >> 16) & 0xFF)) && (((flashaubr+3)&0xFF) >= ((prm_0 >> 16) & 0xFF)) && ((flashcr & 0x08) != 0)) {
 			externaltime += (flashcr >> 5);
 			if (fname4if == "") { return 0; }
 			flashfdcrpt = fopen(fname4if,"rb+");
