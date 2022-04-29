@@ -49,6 +49,7 @@ UINT8 flashwepr = 0xFF;
 UINT8 flashicr = 0;
 UINT8 flashpcr = 0;
 UINT8 intpr[6];
+UINT8 chipselect[4][3] = { {0x00,0xff,0xe8},{0x00,0x00,0x00},{0x00,0x00,0x00},{0x00,0x00,0x00} };
 int pointer4accflash = 0;
 FILE* flashfdcrpt = 0;
 int ret = 0;
@@ -117,6 +118,10 @@ __declspec(dllexport) void f91_reset(void) {
 	intpr[3] = 0;
 	intpr[4] = 0;
 	intpr[5] = 0;
+	chipselect[0][0] = 0x00,0xff,0xe8;
+	chipselect[1][0] = 0x00,0x00,0x00;
+	chipselect[2][0] = 0x00,0x00,0x00;
+	chipselect[3][0] = 0x00,0x00,0x00;
 	cpu_reset();
 }
 
@@ -162,6 +167,21 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			intpr[prm_0 - 0x10] = prm_1;
+			break;
+
+		case 0xa8:
+		case 0xa9:
+		case 0xaa:
+		case 0xab:
+		case 0xac:
+		case 0xad:
+		case 0xae:
+		case 0xaf:
+		case 0xb0:
+		case 0xb1:
+		case 0xb2:
+		case 0xb3:
+			chipselect[(prm_0 - 0xa8) / 3][(prm_0 - 0xa8) % 3] = (UINT8(prm_1&0xFF));
 			break;
 
         case 0xb4:
@@ -252,6 +272,21 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			return intpr[prm_0-0x10];
+			break;
+
+		case 0xa8:
+		case 0xa9:
+		case 0xaa:
+		case 0xab:
+		case 0xac:
+		case 0xad:
+		case 0xae:
+		case 0xaf:
+		case 0xb0:
+		case 0xb1:
+		case 0xb2:
+		case 0xb3:
+			return chipselect[(prm_0 - 0xa8) / 3][(prm_0 - 0xa8) % 3];
 			break;
 
         case 0xb4:
