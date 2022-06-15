@@ -835,6 +835,10 @@ __declspec(dllexport) void cpu_restore_next(void) {
     }
 }
 
+int ez80maxclock = 0;
+__declspec(dllexport) void cpu_set_speed(int tmp) { ez80maxclock = tmp; }
+__declspec(dllexport) int cpu_get_speed() { return ez80maxclock; }
+
 int intvector4int = 0;
 
 __declspec(dllexport) int cpu_execute(void) {
@@ -856,7 +860,7 @@ __declspec(dllexport) int cpu_execute(void) {
     eZ80context_t context;
 
     //while (true) {
-    while (cpu.cycles == 0) {
+    while (cpu.cycles <= ez80maxclock) {
     cpu_execute_continue:
         if (cpu.IEF_wait && cpu.cycles >= cpu.eiDelay) {
             cpu.IEF_wait = false;
