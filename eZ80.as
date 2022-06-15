@@ -12,5 +12,7 @@
 #func control_restore "control_restore"
 #func init_control "init_control"
 #cfunc cpu_get_ctlptr "cpu_get_ctlptr"
+#func cpu_set_speed "cpu_set_speed" int
+#cfunc cpu_get_speed "cpu_get_speed"
 cpu_init
 init_control
