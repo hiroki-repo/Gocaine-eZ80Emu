@@ -87,7 +87,6 @@ __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1) {
 			}
 			break;
 		case 5:
-			f91gpioretvalue = 0;
 			break;
 		case 6:
 			if ((((~prm_1)^GPIO[prm_0][0]) >> cnt) & 1) { cpu_int(0x80+(4*cnt)+(32*prm_0)); Sleep(1); }
