@@ -62,6 +62,7 @@ __declspec(dllexport) void f91spimisocall(bool prm_0) {
 }
 
 __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1) {
+	UINT16 f91gpiointvective = 0;
 	UINT8 f91gpioretvalue = 0;
 	for (int cnt = 0; cnt < 8; cnt++) {
 		UINT8 f91gpioinmode = (((GPIO[prm_0][1] >> cnt) & 1) << 0) | (((GPIO[prm_0][2] >> cnt) & 1) << 1) | (((GPIO[prm_0][3] >> cnt) & 1) << 2);
@@ -82,20 +83,21 @@ __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1) {
 			break;
 		case 4:
 			if ((GPIO[prm_0][0] >> cnt) & 1) {
-				if (((((prm_1 & (~val4GPIOMode6)) & GPIO[prm_0][0]) & (~GPIO[prm_0][4])) >> cnt) & 1) { cpu_int(0x80 + (4 * cnt) + (32 * prm_0)); Sleep(1); }
+				if (((((prm_1 & (~val4GPIOMode6)) & GPIO[prm_0][0]) & (~GPIO[prm_0][4])) >> cnt) & 1) { if (((f91gpiointvective & 0xFF) >= (0x80 + (4 * cnt) + (32 * prm_0))) || ((((f91gpiointvective >> 8) & 1) != ((intpr[2 + prm_0] >> cnt) & 1)) && ((intpr[2 + prm_0] >> cnt) & 1) && (f91gpiointvective & 0x8000))) { f91gpiointvective = 0x8000 | (0x80 + (4 * cnt) + (32 * prm_0)); } f91gpiointvective |= (((intpr[2 + prm_0] >> cnt) & 1) ? 0x100 : 0); }
 				val4GPIOMode6 &= (~(1 << cnt)); val4GPIOMode6 |= (((prm_1 >> cnt) & 1) << cnt);
 			}
 			break;
 		case 5:
 			break;
 		case 6:
-			if ((((~prm_1)^GPIO[prm_0][0]) >> cnt) & 1) { cpu_int(0x80+(4*cnt)+(32*prm_0)); Sleep(1); }
+			if ((((~prm_1) ^ GPIO[prm_0][0]) >> cnt) & 1) { if (((f91gpiointvective & 0xFF) >= (0x80 + (4 * cnt) + (32 * prm_0))) || ((((f91gpiointvective >> 8) & 1) != ((intpr[2 + prm_0] >> cnt) & 1)) && ((intpr[2 + prm_0] >> cnt) & 1) && (f91gpiointvective & 0x8000))) { f91gpiointvective = 0x8000 | (0x80 + (4 * cnt) + (32 * prm_0)); } f91gpiointvective |= (((intpr[2 + prm_0] >> cnt) & 1) ? 0x100 : 0); }
 			break;
 		case 7:
-			if (((prm_1^GPIO[prm_0][0]) >> cnt) & 1) { cpu_int(0x80+(4*cnt)+(32*prm_0)); Sleep(1); }
+			if (((prm_1 ^ GPIO[prm_0][0]) >> cnt) & 1) { if (((f91gpiointvective & 0xFF) >= (0x80 + (4 * cnt) + (32 * prm_0))) || ((((f91gpiointvective >> 8) & 1) != ((intpr[2 + prm_0] >> cnt) & 1)) && ((intpr[2 + prm_0] >> cnt) & 1) && (f91gpiointvective & 0x8000))) { f91gpiointvective = 0x8000 | (0x80 + (4 * cnt) + (32 * prm_0)); } f91gpiointvective |= (((intpr[2 + prm_0] >> cnt) & 1) ? 0x100 : 0); }
 			break;
 		}
 	}
+	if (f91gpiointvective & 0x8000) { cpu_int(f91gpiointvective&0xFF); }
 	return f91gpioretvalue;
 }
 
