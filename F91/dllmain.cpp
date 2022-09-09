@@ -179,7 +179,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
     switch (prm_2) {
     case 0:
     case 1:
-        if ((ramaubr = ((prm_0 >> 16) & 0xFF)) && ((prm_0 & 0xFFFF) >= ((ramcr&0xC0)<<8))) {
+        if ((ramaubr = ((prm_0 >> 16) & 0xFF)) && (((prm_0 & 0xFFFF) >= (((ramcr&0x40)?0xC0:((ramcr & 0x80)?0xE0:0x100))<<8)) && ((prm_0 & 0xFFFF) < (((ramcr & 0x80)?0x100:0xE0)<<8)))) {
             switch (prm_2) { 
             case 0:
                 intram4000h[prm_0 & 0x3FFF] = (prm_1 & 0xFF);
