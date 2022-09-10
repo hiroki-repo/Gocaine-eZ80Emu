@@ -237,8 +237,8 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0xa3:
 		case 0xa4:
 		case 0xa5:
-			if ((((prm_0 - 0x96) % 4) == 0) && (f91gpioack != nullptr)) { for (int cnt = 0; cnt < 8; cnt++) { UINT8 f91gpioinmode = (((GPIO[(prm_0 - 0x96) / 4][1] >> cnt) & 1) << 0) | (((GPIO[(prm_0 - 0x96) / 4][2] >> cnt) & 1) << 1) | (((GPIO[(prm_0 - 0x96) / 4][3] >> cnt) & 1) << 2); if ((f91gpioinmode == 0) || (f91gpioinmode == 2) || (f91gpioinmode == 3)) { f91gpioack((prm_0 - 0x96) / 4); break; } } }
 			GPIO[(prm_0 - 0x96) / 4][(prm_0 - 0x96) % 4] = prm_1;
+			if ((((prm_0 - 0x96) % 4) == 0) && (f91gpioack != nullptr)) { for (int cnt = 0; cnt < 8; cnt++) { UINT8 f91gpioinmode = (((GPIO[(prm_0 - 0x96) / 4][1] >> cnt) & 1) << 0) | (((GPIO[(prm_0 - 0x96) / 4][2] >> cnt) & 1) << 1) | (((GPIO[(prm_0 - 0x96) / 4][3] >> cnt) & 1) << 2); if ((f91gpioinmode == 0) || (f91gpioinmode == 2) || (f91gpioinmode == 3)) { f91gpioack((prm_0 - 0x96) / 4); break; } } }
 			break;
 		case 0xa6:
 		case 0xa7:
