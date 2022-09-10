@@ -5,4 +5,4 @@
 #func f91macfuncset "f91macfuncset" int,int,int,int,int,int
 #func f91spimisocall "f91spimisocall" int
 #cfunc mac4ez80dll "mac4ez80dll" int,int,int
-#cfunc f91gpiocall "f91gpiocall" int,int
+#cfunc f91gpiocall "f91gpiocall" int,int,int
