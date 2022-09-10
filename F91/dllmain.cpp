@@ -61,7 +61,7 @@ __declspec(dllexport) void f91spimisocall(bool prm_0) {
 	buf4rttmpx &= 0x7; if (buf4rttmpx == 0) { buf4rttmp = 0; spisr &= 0x7F; } buf4rttmp |= prm_0 << (buf4rttmpx++); if (buf4rttmpx == 7) { spisr |= 0x80; buf4rt[buf4acc++] = buf4rttmp; buf4rttmpx = 0; if (spicr & 0x80) { cpu_int(0x7c); } }
 }
 
-__declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1) {
+__declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1,bool prm_2) {
 	UINT16 f91gpiointvective = 0;
 	UINT8 f91gpioretvalue = 0;
 	for (int cnt = 0; cnt < 8; cnt++) {
@@ -72,14 +72,16 @@ __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1) {
 			f91gpioretvalue |= ((((prm_1 & (~GPIO[prm_0][1])) >> cnt) & 1) << cnt);
 			break;
 		case 1:
-			GPIO[prm_0][0] &= (~(1 << cnt));
-			GPIO[prm_0][0] |= ((((prm_1 & GPIO[prm_0][1]) >> cnt) & 1) << cnt);
+			if (prm_2 == false) {
+				GPIO[prm_0][0] &= (~(1 << cnt));
+				GPIO[prm_0][0] |= ((((prm_1 & GPIO[prm_0][1]) >> cnt) & 1) << cnt);
+			}
 			break;
 		case 2:
-			if ((GPIO[prm_0][0] >> cnt) & 1) { GPIO[prm_0][0] &= (~(1 << cnt)); GPIO[prm_0][0] |= ((((prm_1) >> cnt) & 1) << cnt); }else{ f91gpioretvalue &= (~(1 << cnt)); f91gpioretvalue &= (~(1 << cnt)); }
+			if ((GPIO[prm_0][0] >> cnt) & 1) { if (prm_2 == false){GPIO[prm_0][0] &= (~(1 << cnt)); GPIO[prm_0][0] |= ((((prm_1) >> cnt) & 1) << cnt);} }else{ f91gpioretvalue &= (~(1 << cnt)); f91gpioretvalue &= (~(1 << cnt)); }
 			break;
 		case 3:
-			if ((GPIO[prm_0][0] >> cnt) & 1) { f91gpioretvalue &= (~(1 << cnt)); f91gpioretvalue |= ((1 << cnt)); }else{ GPIO[prm_0][0] &= (~(1 << cnt)); GPIO[prm_0][0] |= ((((prm_1) >> cnt) & 1) << cnt); }
+			if ((GPIO[prm_0][0] >> cnt) & 1) { f91gpioretvalue &= (~(1 << cnt)); f91gpioretvalue |= ((1 << cnt)); }else{ if (prm_2 == false){GPIO[prm_0][0] &= (~(1 << cnt)); GPIO[prm_0][0] |= ((((prm_1) >> cnt) & 1) << cnt);} }
 			break;
 		case 4:
 			if ((GPIO[prm_0][0] >> cnt) & 1) {
