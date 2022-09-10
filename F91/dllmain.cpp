@@ -69,7 +69,7 @@ __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1,bool prm_2) {
 		switch (f91gpioinmode) {
 		case 0:
 			f91gpioretvalue &= (~(1 << cnt));
-			f91gpioretvalue |= ((((prm_1 & (~GPIO[prm_0][1])) >> cnt) & 1) << cnt);
+			f91gpioretvalue |= ((((GPIO[prm_0][0] & (~GPIO[prm_0][1])) >> cnt) & 1) << cnt);
 			break;
 		case 1:
 			if (prm_2 == false) {
