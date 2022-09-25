@@ -1,7 +1,9 @@
 #uselib "eZ80.dll"
 #func cpu_crash "cpu_crash"
 #cfunc cpu_execute "cpu_execute"
+#cfunc cpu_get_interruptstat "cpu_get_interruptstat"
 #cfunc cpu_get_regptr "cpu_get_regptr"
+#cfunc cpu_get_stat "cpu_get_stat"
 #func cpu_halt "cpu_halts"
 #func cpu_init "cpu_init"
 #func cpu_int "cpu_int" int
