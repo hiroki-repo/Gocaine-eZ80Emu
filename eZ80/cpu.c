@@ -1679,3 +1679,6 @@ __declspec(dllexport) void cpu_halts() {
 }
 
 __declspec(dllexport) int cpu_get_regptr() { return ((int)(&cpu.registers)); }
+
+__declspec(dllexport) eZ80cpu_t* cpu_get_stat(){ return &cpu; }
+__declspec(dllexport) interrupt_state_t* cpu_get_interruptstat() { return intrpt; }

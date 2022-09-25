@@ -22,9 +22,25 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #ifdef __cplusplus
 extern "C"{
 #endif
+#define uint32_t UINT32
+
+typedef struct interrupt_state {
+	uint32_t status : 22;
+	uint32_t : 2;
+	uint32_t enabled : 22;
+	uint32_t : 2;
+	uint32_t latched : 22;
+	uint32_t : 2;
+	uint32_t inverted : 22;
+	uint32_t : 2;
+} interrupt_state_t;
+
+interrupt_state_t* intrpt;
+
 int (*f91memaccess)(int, int, int);
 void (*f91spiaccess)(bool);
 void (*f91gpioack)(UINT32);
+interrupt_state_t* (*cpu_get_interruptstat)();
 void (*cpu_int)(int);
 void (*cpu_reset)(void);
 int (*cpu_execute)(void);
@@ -56,9 +72,12 @@ UINT8 val4GPIOMode6 = 0;
 int pointer4accflash = 0;
 FILE* flashfdcrpt = 0;
 int ret = 0;
+UINT8 cpuinterruptbak = 0;
+
+void f91cpu_int(int prm_0) { if (intrpt != nullptr) { if (intrpt->status == 0) { cpuinterruptbak = 0; } } if (cpuinterruptbak <= ((prm_0) | ((prm_0 >= 0x40) && (prm_0 <= 0xFF) ? (((intpr[(prm_0 - 0x40) / 8] >> (prm_0 % 8)) & 1) ? 0x100 : 0) : 0))) { cpu_int(prm_0); cpuinterruptbak = prm_0; } }
 
 __declspec(dllexport) void f91spimisocall(bool prm_0) { 
-	buf4rttmpx &= 0x7; if (buf4rttmpx == 0) { buf4rttmp = 0; spisr &= 0x7F; } buf4rttmp |= prm_0 << (buf4rttmpx++); if (buf4rttmpx == 7) { spisr |= 0x80; buf4rt[buf4acc++] = buf4rttmp; buf4rttmpx = 0; if (spicr & 0x80) { cpu_int(0x7c); } }
+	buf4rttmpx &= 0x7; if (buf4rttmpx == 0) { buf4rttmp = 0; spisr &= 0x7F; } buf4rttmp |= prm_0 << (buf4rttmpx++); if (buf4rttmpx == 7) { spisr |= 0x80; buf4rt[buf4acc++] = buf4rttmp; buf4rttmpx = 0; if (spicr & 0x80) { f91cpu_int(0x7c); } }
 }
 
 __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1,bool prm_2) {
@@ -99,7 +118,7 @@ __declspec(dllexport) UINT8 f91gpiocall(UINT32 prm_0,UINT8 prm_1,bool prm_2) {
 			break;
 		}
 	}
-	if (f91gpiointvective & 0x8000) { cpu_int(f91gpiointvective&0xFF); }
+	if (f91gpiointvective & 0x8000) { f91cpu_int(f91gpiointvective&0xFF); }
 	return f91gpioretvalue;
 }
 
@@ -128,10 +147,10 @@ case 1:
 return false;
 #endif
 
-__declspec(dllexport) void f91macfuncset(int (*tmpfunc)(int, int, int), void (*tmpfunc2)(bool), void (*tmpfunc3)(int), void (*tmpfunc4)(void), int (*tmpfunc5)(void), void (*tmpfunc6)(UINT32)) { f91memaccess = tmpfunc; f91spiaccess = tmpfunc2; cpu_int = tmpfunc3; cpu_reset = tmpfunc4; cpu_execute = tmpfunc5; f91gpioack = tmpfunc6; }
+__declspec(dllexport) void f91macfuncset(int (*tmpfunc)(int, int, int), void (*tmpfunc2)(bool), void (*tmpfunc3)(int), void (*tmpfunc4)(void), int (*tmpfunc5)(void), void (*tmpfunc6)(UINT32), interrupt_state_t* (*tmpfunc7)()) { f91memaccess = tmpfunc; f91spiaccess = tmpfunc2; cpu_int = tmpfunc3; cpu_reset = tmpfunc4; cpu_execute = tmpfunc5; f91gpioack = tmpfunc6; if (tmpfunc7 != nullptr) { intrpt = tmpfunc7(); } }
 __declspec(dllexport) void f91internalflashpathset(char *tmpfname) { fname4if = tmpfname; }
 
-__declspec(dllexport) int f91_execute(void) { externaltime = 0; return cpu_execute() + externaltime; }
+__declspec(dllexport) int f91_execute(void) { cpuinterruptbak = 0; externaltime = 0; return cpu_execute() + externaltime; }
 
 __declspec(dllexport) void f91_reset(void) { 
 	
@@ -207,12 +226,12 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return ret;
 		}
 		else {
-			for (int cnt = 3; cnt >= 0; cnt--) { if (((chipselect[cnt][2] & 16) == 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 16) & 0xFF) >= chipselect[cnt][0]) && (((prm_0 >> 16) & 0xFF) <= chipselect[cnt][1])) { chipselectinfo = (cnt | 0x80); break; } }
+			for (int cnt = 0; cnt <= 3; cnt++) { if (((chipselect[cnt][2] & 16) == 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 16) & 0xFF) >= chipselect[cnt][0]) && (((prm_0 >> 16) & 0xFF) <= chipselect[cnt][1])) { chipselectinfo = (cnt | 0x80); break; } }
 			return f91memaccess(prm_0, prm_1, prm_2 | (chipselectinfo << 24));
         }
         break;
     case 2:
-		if (prm_0 >= 0x100) { for (int cnt = 3; cnt >= 0; cnt--) { if (((chipselect[cnt][2] & 16) != 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 8) & 0xFF) == chipselect[cnt][0])) { chipselectinfo = (cnt | 0x80); break; } } return f91memaccess(prm_0, prm_1, prm_2 | (chipselectinfo << 24)); }
+		if (prm_0 >= 0x100) { for (int cnt = 0; cnt <= 3; cnt++) { if (((chipselect[cnt][2] & 16) != 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 8) & 0xFF) == chipselect[cnt][0])) { chipselectinfo = (cnt | 0x80); break; } } return f91memaccess(prm_0, prm_1, prm_2 | (chipselectinfo << 24)); }
 		switch (prm_0) {
 		case 0x10:
 		case 0x11:
@@ -308,7 +327,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
 			fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
-			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); if (flashicr & 0x80) { cpu_int(0x50); } } else { if (flashicr & 0x40) { cpu_int(0x50); } }
+			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); if (flashicr & 0x80) { f91cpu_int(0x50); } } else { if (flashicr & 0x40) { f91cpu_int(0x50); } }
 			fclose(flashfdcrpt);
 			break;
 		case 0xf7:
@@ -337,7 +356,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
         }
         break;
     case 3:
-		if (prm_0 >= 0x100){ for (int cnt = 3; cnt >= 0; cnt--) { if (((chipselect[cnt][2] & 16) != 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 8) & 0xFF) == chipselect[cnt][0])) { chipselectinfo = (cnt | 0x80); break; } } return f91memaccess(prm_0, prm_1, prm_2 | (chipselectinfo << 24)); }
+		if (prm_0 >= 0x100){ for (int cnt = 0; cnt <= 3; cnt++) { if (((chipselect[cnt][2] & 16) != 0) && (chipselect[cnt][2] & 8) && (((prm_0 >> 8) & 0xFF) == chipselect[cnt][0])) { chipselectinfo = (cnt | 0x80); break; } } return f91memaccess(prm_0, prm_1, prm_2 | (chipselectinfo << 24)); }
         switch (prm_0) {
 		case 0x00:
 			return 0x08;
@@ -441,7 +460,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
 			ret = fgetc(flashfdcrpt);
 			fclose(flashfdcrpt);
-			//cpu_int(0x50);
+			//f91cpu_int(0x50);
 			return ret;
 			break;
 		case 0xf7:
