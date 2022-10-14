@@ -3,6 +3,8 @@
 #include <stdio.h>
 #pragma warning(disable : 4996)
 
+extern "C" FILE* flashfdcrpt;
+
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -13,8 +15,10 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     case DLL_PROCESS_ATTACH:
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
+		break;
+	case DLL_PROCESS_DETACH:
+		if (flashfdcrpt != nullptr) { fclose(flashfdcrpt); }
+		break;
     }
     return TRUE;
 }
@@ -73,6 +77,16 @@ int pointer4accflash = 0;
 FILE* flashfdcrpt = 0;
 int ret = 0;
 UINT8 cpuinterruptbak = 0;
+UINT32 clockstock = 0;
+UINT8 TMRx_CTR[4];
+UINT8 TMRx_IER[4];
+UINT8 TMRx_IIR[4];
+UINT16 TMRx_RR[4];
+UINT8 TMRx_CAP_CTL[4];
+UINT16 TMRx_CAPA[4];
+UINT8 TMR3_OC_CTLx[2];
+UINT16 TMR3_OCx[4];
+UINT16 TMR1_CAPB;
 
 void f91cpu_int(int prm_0) { if (intrpt != nullptr) { if (intrpt->status == 0) { cpuinterruptbak = 0; } } if (cpuinterruptbak <= ((prm_0) | ((prm_0 >= 0x40) && (prm_0 <= 0xFF) ? (((intpr[(prm_0 - 0x40) / 8] >> (prm_0 % 8)) & 1) ? 0x100 : 0) : 0))) { cpu_int(prm_0); cpuinterruptbak = prm_0; } }
 
@@ -148,9 +162,12 @@ return false;
 #endif
 
 __declspec(dllexport) void f91macfuncset(int (*tmpfunc)(int, int, int), void (*tmpfunc2)(bool), void (*tmpfunc3)(int), void (*tmpfunc4)(void), int (*tmpfunc5)(void), void (*tmpfunc6)(UINT32), interrupt_state_t* (*tmpfunc7)()) { f91memaccess = tmpfunc; f91spiaccess = tmpfunc2; cpu_int = tmpfunc3; cpu_reset = tmpfunc4; cpu_execute = tmpfunc5; f91gpioack = tmpfunc6; if (tmpfunc7 != nullptr) { intrpt = tmpfunc7(); } }
-__declspec(dllexport) void f91internalflashpathset(char *tmpfname) { fname4if = tmpfname; }
+__declspec(dllexport) void f91internalflashpathset(char *tmpfname) { fname4if = tmpfname;
+flashfdcrpt = fopen(fname4if, "rb+");
+if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
+}
 
-__declspec(dllexport) int f91_execute(void) { cpuinterruptbak = 0; externaltime = 0; return cpu_execute() + externaltime; }
+__declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp; return clockstocktmp; }
 
 __declspec(dllexport) void f91_reset(void) { 
 	
@@ -182,14 +199,49 @@ __declspec(dllexport) void f91_reset(void) {
 	intpr[3] = 0;
 	intpr[4] = 0;
 	intpr[5] = 0;
-	chipselect[0][0] = 0x00,0xff,0xe8;
-	chipselect[1][0] = 0x00,0x00,0x00;
-	chipselect[2][0] = 0x00,0x00,0x00;
-	chipselect[3][0] = 0x00,0x00,0x00;
-	GPIO[0][0] = 0x00, 0xff, 0x00, 0x00, 0x00;
-	GPIO[1][0] = 0x00, 0xff, 0x00, 0x00, 0x00;
-	GPIO[2][0] = 0x00, 0xff, 0x00, 0x00, 0x00;
-	GPIO[3][0] = 0x00, 0xff, 0x00, 0x00, 0x00;
+	chipselect[0][0] = 0x00;
+	chipselect[0][1] = 0xff;
+	chipselect[0][2] = 0xe8;
+	chipselect[1][0] = 0x00;
+	chipselect[1][1] = 0x00;
+	chipselect[1][2] = 0x00;
+	chipselect[2][0] = 0x00;
+	chipselect[2][1] = 0x00;
+	chipselect[2][2] = 0x00;
+	chipselect[3][0] = 0x00;
+	chipselect[3][1] = 0x00;
+	chipselect[3][2] = 0x00;
+	GPIO[0][0] = 0x00;
+	GPIO[0][1] = 0xff;
+	GPIO[0][2] = 0x00;
+	GPIO[0][3] = 0x00;
+	GPIO[0][4] = 0x00;
+
+	GPIO[1][0] = 0x00;
+	GPIO[1][1] = 0xff;
+	GPIO[1][2] = 0x00;
+	GPIO[1][3] = 0x00;
+	GPIO[1][4] = 0x00;
+
+	GPIO[2][0] = 0x00;
+	GPIO[2][1] = 0xff;
+	GPIO[2][2] = 0x00;
+	GPIO[2][3] = 0x00;
+	GPIO[2][4] = 0x00;
+
+	GPIO[3][0] = 0x00;
+	GPIO[3][1] = 0xff;
+	GPIO[3][2] = 0x00;
+	GPIO[3][3] = 0x00;
+	GPIO[3][4] = 0x00;
+
+	clockstock=0;
+	TMR3_OC_CTLx[0] = 0;
+	TMR3_OC_CTLx[1] = 0;
+
+	TMR1_CAPB = 0;
+
+	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	cpu_reset();
 }
 
@@ -212,8 +264,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			externaltime += (flashcr >> 5);
 			if (fname4if == nullptr) { return 0; }
 			if ((&fname4if) == NULL) { return 0; }
-			flashfdcrpt = fopen(fname4if,"rb+");
-			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 			fseek(flashfdcrpt,(prm_0 - (flashaubr << 16)),SEEK_SET);
 			ret = 0;
 			switch (prm_2) {
@@ -222,7 +272,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			case 1:
 				ret = fgetc(flashfdcrpt);
 			}
-			fclose(flashfdcrpt);
 			return ret;
 		}
 		else {
@@ -240,6 +289,99 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			intpr[prm_0 - 0x10] = prm_1;
+			break;
+
+		case 0x60:
+			TMRx_CTR[0] = prm_1;
+			break;
+		case 0x61:
+			TMRx_IER[0] = (prm_1 & 0x7f);
+			break;
+
+		case 0x63:
+			TMRx_RR[0] = (TMRx_RR[0] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x64:
+			TMRx_RR[0] = (TMRx_RR[0] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+		case 0x65:
+			TMRx_CTR[1] = prm_1;
+			break;
+		case 0x66:
+			TMRx_IER[1] = (prm_1 & 0x7f);
+			break;
+
+		case 0x68:
+			TMRx_RR[1] = (TMRx_RR[1] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x69:
+			TMRx_RR[1] = (TMRx_RR[1] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+		case 0x6a:
+			TMRx_CAP_CTL[1] = prm_1;
+			break;
+		case 0x6b:
+			TMRx_CAPA[1] = (TMRx_CAPA[1] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x6c:
+			TMRx_CAPA[1] = (TMRx_CAPA[1] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+
+		case 0x6f:
+			TMRx_CTR[2] = prm_1;
+			break;
+		case 0x70:
+			TMRx_IER[2] = (prm_1 & 0x7f);
+			break;
+
+		case 0x72:
+			TMRx_RR[2] = (TMRx_RR[2] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x73:
+			TMRx_RR[2] = (TMRx_RR[2] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+		case 0x74:
+			TMRx_CTR[3] = prm_1;
+			break;
+		case 0x75:
+			TMRx_IER[3] = (prm_1 & 0x7f);
+			break;
+
+		case 0x77:
+			TMRx_RR[3] = (TMRx_RR[3] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x78:
+			TMRx_RR[3] = (TMRx_RR[3] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+
+		case 0x7b:
+			TMRx_CAP_CTL[1] = prm_1;
+			break;
+		case 0x7c:
+			TMRx_CAPA[3] = (TMRx_CAPA[3] & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x7d:
+			TMRx_CAPA[3] = (TMRx_CAPA[3] & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+		case 0x7e:
+			TMR1_CAPB = (TMR1_CAPB & 0xFF00) | (prm_1 << (8 * 0));
+			break;
+		case 0x7f:
+			TMR1_CAPB = (TMR1_CAPB & 0x00FF) | (prm_1 << (8 * 1));
+			break;
+		case 0x80:
+		case 0x81:
+			TMR3_OC_CTLx[prm_0 & 1] = prm_1;
+			break;
+		case 0x82:
+		case 0x83:
+		case 0x84:
+		case 0x85:
+		case 0x86:
+		case 0x87:
+		case 0x88:
+		case 0x89:
+			TMR3_OCx[(prm_0 - 0x82) / 2] = (TMR3_OCx[(prm_0 - 0x82) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
 			break;
 
 		case 0x96:
@@ -375,6 +517,99 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			return intpr[prm_0-0x10];
+			break;
+
+		case 0x60:
+			return TMRx_CTR[0];
+			break;
+		case 0x61:
+			return TMRx_IER[0];
+			break;
+
+		case 0x63:
+			return (TMRx_RR[0] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x64:
+			return (TMRx_RR[0] >> (8 * 1)) & 0xFF;
+			break;
+		case 0x65:
+			return TMRx_CTR[1];
+			break;
+		case 0x66:
+			return TMRx_IER[1];
+			break;
+
+		case 0x68:
+			return (TMRx_RR[1] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x69:
+			return (TMRx_RR[1] >> (8 * 1)) & 0xFF;
+			break;
+		case 0x6a:
+			return TMRx_CAP_CTL[1];
+			break;
+		case 0x6b:
+			return (TMRx_CAPA[1] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x6c:
+			return (TMRx_CAPA[1] >> (8 * 1)) & 0xFF;
+			break;
+
+		case 0x6f:
+			return TMRx_CTR[2];
+			break;
+		case 0x70:
+			return TMRx_IER[2];
+			break;
+
+		case 0x72:
+			return (TMRx_RR[2] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x73:
+			return (TMRx_RR[2] >> (8 * 1)) & 0xFF;
+			break;
+		case 0x74:
+			return TMRx_CTR[3];
+			break;
+		case 0x75:
+			return TMRx_IER[3];
+			break;
+
+		case 0x77:
+			return (TMRx_RR[3] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x78:
+			return (TMRx_RR[3] >> (8 * 1)) & 0xFF;
+			break;
+
+		case 0x7b:
+			return TMRx_CAP_CTL[1];
+			break;
+		case 0x7c:
+			return (TMRx_CAPA[3] >> (8 * 0)) & 0xFF;
+			break;
+		case 0x7d:
+			return (TMRx_CAPA[3] >> (8 * 1)) & 0xFF;
+			break;
+		case 0x7e:
+			return (TMR1_CAPB >> (8 * 0)) & 0xFF;
+			break;
+		case 0x7f:
+			return (TMR1_CAPB >> (8 * 1)) & 0xFF;
+			break;
+		case 0x80:
+		case 0x81:
+			return TMR3_OC_CTLx[prm_0 & 1];
+			break;
+		case 0x82:
+		case 0x83:
+		case 0x84:
+		case 0x85:
+		case 0x86:
+		case 0x87:
+		case 0x88:
+		case 0x89:
+			return (TMR3_OCx[(prm_0 - 0x82) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
 			break;
 
 		case 0x96:
