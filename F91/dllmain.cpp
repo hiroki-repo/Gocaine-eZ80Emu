@@ -507,7 +507,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
 			fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
-			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); if (flashicr & 0x80) { f91cpu_int(0x50); } } else { if (flashicr & 0x40) { f91cpu_int(0x50); } }
+			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f91cpu_int(0x50); } } else { flashicr |= 0x8; if (flashicr & 0x40) { f91cpu_int(0x50); } }
 			//fclose(flashfdcrpt);
 			break;
 		case 0xf7:
@@ -532,6 +532,24 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			break;
 		case 0xff:
 			flashpcr = prm_1 & 0x07;
+			if (prm_1 & 2) {
+				pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
+				for(int cnt = 0; cnt < 2048; cnt++) {
+					fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
+					if ((((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) && ((flashptr[0] & 0x80) ? ((pointer4accflash % 2048) < 512) : true)) { fputc((0), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f91cpu_int(0x50); } }
+					else { flashicr |= 0x2; if (flashicr & 0x40) { f91cpu_int(0x50); } }
+				}
+				if (!(flashicr & 2)) { flashpcr &= 0x5; }
+			}
+			if (prm_1 & 1) {
+				pointer4accflash = 0;
+				for (int cnt = 0; cnt < 2048; cnt++) {
+					fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
+					if ((((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) && ((flashptr[0] & 0x80) ? true : ((pointer4accflash % 2048) >= 512))) { fputc((0), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f91cpu_int(0x50); } }
+					else { flashicr |= 0x1; if (flashicr & 0x40) { f91cpu_int(0x50); } }
+				}
+				if (!(flashicr & 1)) { flashpcr &= 0x6; }
+			}
 			break;
         }
         break;
