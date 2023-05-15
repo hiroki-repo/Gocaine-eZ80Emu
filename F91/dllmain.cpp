@@ -78,9 +78,11 @@ FILE* flashfdcrpt = 0;
 int ret = 0;
 UINT8 cpuinterruptbak = 0;
 UINT32 clockstock = 0;
+UINT32 clockstockold = 0;
 UINT8 TMRx_CTR[4];
 UINT8 TMRx_IER[4];
 UINT8 TMRx_IIR[4];
+UINT16 TMRx_DR[4];
 UINT16 TMRx_RR[4];
 UINT8 TMRx_CAP_CTL[4];
 UINT16 TMRx_CAPA[4];
@@ -167,7 +169,24 @@ flashfdcrpt = fopen(fname4if, "rb+");
 if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 }
 
-__declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp; return clockstocktmp; }
+__declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp;
+for (int cnt = 0; cnt < 4; cnt++) {
+	if (TMRx_CTR[cnt] & 1) {
+		if ((clockstock - clockstockold) >= (1 << ((((TMRx_CTR[cnt] >> 3) & 3) + 1) * 2))) {
+			clockstockold = clockstock;
+			if ((TMRx_DR[cnt] != 0) || (TMRx_CTR[cnt] & 4))
+				TMRx_DR[cnt]--;
+		}
+		if (TMRx_DR[cnt] == 0) { TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+		for (int cnt2 = 0; cnt2 < 4; cnt2++) {
+			if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+		}
+		if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0)) || (TMRx_CTR[cnt] & 2)) {
+			TMRx_DR[cnt] = TMRx_RR[cnt];
+		}
+	}
+}
+return clockstocktmp; }
 
 __declspec(dllexport) void f91_reset(void) { 
 	
@@ -236,12 +255,13 @@ __declspec(dllexport) void f91_reset(void) {
 	GPIO[3][4] = 0x00;
 
 	clockstock=0;
+	clockstockold = 0;
 	TMR3_OC_CTLx[0] = 0;
 	TMR3_OC_CTLx[1] = 0;
 
 	TMR1_CAPB = 0;
 
-	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
+	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_DR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	cpu_reset();
 }
 
@@ -525,12 +545,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x61:
 			return TMRx_IER[0];
 			break;
-
+		case 0x62:
+		{UINT8 iirtmp = TMRx_IIR[0]; TMRx_IIR[0] = 0; return iirtmp; }
+			break;
 		case 0x63:
-			return (TMRx_RR[0] >> (8 * 0)) & 0xFF;
+			return (TMRx_DR[0] >> (8 * 0)) & 0xFF;
 			break;
 		case 0x64:
-			return (TMRx_RR[0] >> (8 * 1)) & 0xFF;
+			return (TMRx_DR[0] >> (8 * 1)) & 0xFF;
 			break;
 		case 0x65:
 			return TMRx_CTR[1];
@@ -538,12 +560,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x66:
 			return TMRx_IER[1];
 			break;
-
+		case 0x67:
+		{UINT8 iirtmp = TMRx_IIR[1]; TMRx_IIR[1] = 0; return iirtmp; }
+			break;
 		case 0x68:
-			return (TMRx_RR[1] >> (8 * 0)) & 0xFF;
+			return (TMRx_DR[1] >> (8 * 0)) & 0xFF;
 			break;
 		case 0x69:
-			return (TMRx_RR[1] >> (8 * 1)) & 0xFF;
+			return (TMRx_DR[1] >> (8 * 1)) & 0xFF;
 			break;
 		case 0x6a:
 			return TMRx_CAP_CTL[1];
@@ -561,12 +585,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x70:
 			return TMRx_IER[2];
 			break;
-
+		case 0x71:
+		{UINT8 iirtmp = TMRx_IIR[2]; TMRx_IIR[2] = 0; return iirtmp; }
+			break;
 		case 0x72:
-			return (TMRx_RR[2] >> (8 * 0)) & 0xFF;
+			return (TMRx_DR[2] >> (8 * 0)) & 0xFF;
 			break;
 		case 0x73:
-			return (TMRx_RR[2] >> (8 * 1)) & 0xFF;
+			return (TMRx_DR[2] >> (8 * 1)) & 0xFF;
 			break;
 		case 0x74:
 			return TMRx_CTR[3];
@@ -574,12 +600,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x75:
 			return TMRx_IER[3];
 			break;
-
+		case 0x76:
+		{UINT8 iirtmp = TMRx_IIR[3]; TMRx_IIR[3] = 0; return iirtmp; }
+			break;
 		case 0x77:
-			return (TMRx_RR[3] >> (8 * 0)) & 0xFF;
+			return (TMRx_DR[3] >> (8 * 0)) & 0xFF;
 			break;
 		case 0x78:
-			return (TMRx_RR[3] >> (8 * 1)) & 0xFF;
+			return (TMRx_DR[3] >> (8 * 1)) & 0xFF;
 			break;
 
 		case 0x7b:
