@@ -170,13 +170,14 @@ if (flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 }
 
 __declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp;
+bool isclockstockold = false;
 for (int cnt = 0; cnt < 4; cnt++) {
 	if (TMRx_CTR[cnt] & 1) {
 		if ((clockstock - clockstockold) >= (1 << ((((TMRx_CTR[cnt] >> 3) & 3) + 1) * 2))) {
-			clockstockold = clockstock;
+			isclockstockold = true;
 			if ((TMRx_DR[cnt] != 0) || (TMRx_CTR[cnt] & 4))
 				TMRx_DR[cnt]--;
-			if (TMRx_DR[cnt] == 0) { TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+			if (TMRx_DR[cnt] == 0) { if (!(TMRx_CTR[cnt] & 4)) { TMRx_CTR[cnt] &= 0xFE; } TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
 			for (int cnt2 = 0; cnt2 < 4; cnt2++) {
 				if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
 			}
@@ -186,6 +187,7 @@ for (int cnt = 0; cnt < 4; cnt++) {
 		}
 	}
 }
+if (isclockstockold == true) { clockstockold = clockstock; }
 return clockstocktmp; }
 
 __declspec(dllexport) void f91_reset(void) { 
