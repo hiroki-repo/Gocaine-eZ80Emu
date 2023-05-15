@@ -501,14 +501,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			externaltime += flashfdr;
 			if (fname4if == nullptr) { return 0; }
 			if (&fname4if == NULL) { return 0; }
-			flashfdcrpt = fopen(fname4if, "rb+");
-			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
-			if (&flashfdcrpt == 0) { return 0; }
+			//flashfdcrpt = fopen(fname4if, "rb+");
+			//if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
+			//if (&flashfdcrpt == 0) { return 0; }
 			pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
 			fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
 			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); if (flashicr & 0x80) { f91cpu_int(0x50); } } else { if (flashicr & 0x40) { f91cpu_int(0x50); } }
-			fclose(flashfdcrpt);
+			//fclose(flashfdcrpt);
 			break;
 		case 0xf7:
 			flashaubr = prm_1 & 0xFC;
@@ -733,14 +733,14 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			externaltime += flashfdr;
 			if (fname4if == nullptr) { return 0; }
 			if (&fname4if == NULL) { return 0; }
-			flashfdcrpt = fopen(fname4if, "rb+");
-			if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
-			if (&flashfdcrpt == 0) { return 0; }
+			//flashfdcrpt = fopen(fname4if, "rb+");
+			//if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
+			//if (&flashfdcrpt == 0) { return 0; }
 			pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
 			fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
 			ret = fgetc(flashfdcrpt);
-			fclose(flashfdcrpt);
+			//fclose(flashfdcrpt);
 			//f91cpu_int(0x50);
 			return ret;
 			break;
