@@ -176,13 +176,13 @@ for (int cnt = 0; cnt < 4; cnt++) {
 			clockstockold = clockstock;
 			if ((TMRx_DR[cnt] != 0) || (TMRx_CTR[cnt] & 4))
 				TMRx_DR[cnt]--;
-		}
-		if (TMRx_DR[cnt] == 0) { TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
-		for (int cnt2 = 0; cnt2 < 4; cnt2++) {
-			if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
-		}
-		if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0)) || (TMRx_CTR[cnt] & 2)) {
-			TMRx_DR[cnt] = TMRx_RR[cnt];
+			if (TMRx_DR[cnt] == 0) { TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+			for (int cnt2 = 0; cnt2 < 4; cnt2++) {
+				if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+			}
+			if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0)) || (TMRx_CTR[cnt] & 2)) {
+				TMRx_DR[cnt] = TMRx_RR[cnt];
+			}
 		}
 	}
 }
