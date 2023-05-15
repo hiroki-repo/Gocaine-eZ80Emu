@@ -1,5 +1,6 @@
 #uselib "F91.dll"
 #cfunc f91_execute "f91_execute"
+#cfunc f91_execute_cc "f91_execute_cc" int
 #func f91_reset "f91_reset"
 #func f91internalflashpathset "f91internalflashpathset" sptr
 #func f91macfuncset "f91macfuncset" int,int,int,int,int,int,int
