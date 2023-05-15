@@ -775,7 +775,9 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return flashwepr;
 			break;
 		case 0xfb:
-			return flashicr &= 0xD0;
+			ret = flashicr;
+			flashicr &= 0xD0;
+			return ret;
 			break;
 		case 0xfc:
 		case 0xfd:
