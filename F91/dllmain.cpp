@@ -166,7 +166,7 @@ return false;
 __declspec(dllexport) void f91macfuncset(int (*tmpfunc)(int, int, int), void (*tmpfunc2)(bool), void (*tmpfunc3)(int), void (*tmpfunc4)(void), int (*tmpfunc5)(void), void (*tmpfunc6)(UINT32), interrupt_state_t* (*tmpfunc7)()) { f91memaccess = tmpfunc; f91spiaccess = tmpfunc2; cpu_int = tmpfunc3; cpu_reset = tmpfunc4; cpu_execute = tmpfunc5; f91gpioack = tmpfunc6; if (tmpfunc7 != nullptr) { intrpt = tmpfunc7(); } }
 __declspec(dllexport) void f91internalflashpathset(char *tmpfname) { fname4if = tmpfname;
 flashfdcrpt = fopen(fname4if, "rb+");
-if (&flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
+if (flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 }
 
 __declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp;
