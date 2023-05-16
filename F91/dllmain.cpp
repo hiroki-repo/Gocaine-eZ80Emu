@@ -41,6 +41,8 @@ typedef struct interrupt_state {
 
 interrupt_state_t* intrpt;
 
+UINT64 emacaddr = 0;
+UINT16 EMAC_MAXF = 0x600;
 int (*f91memaccess)(int, int, int);
 void (*f91spiaccess)(bool);
 void (*f91gpioack)(UINT32);
@@ -196,6 +198,8 @@ __declspec(dllexport) int f91_execute_cc(UINT32 prm_0) { UINT32 clockstocktmp2 =
 
 __declspec(dllexport) void f91_reset(void) { 
 	
+	emacaddr = 0;
+	EMAC_MAXF = 0x600;
 	ramaubr = 0xFF;
 	ramcr = 0xC0;
 	for(int i=0;i<0x4000;i++){ intram4000h[i] = 0; }
@@ -315,6 +319,20 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			intpr[prm_0 - 0x10] = prm_1;
+			break;
+
+		case 0x25:
+		case 0x26:
+		case 0x27:
+		case 0x28:
+		case 0x29:
+		case 0x2a:
+			emacaddr = (emacaddr & (~(255 << (8 * (prm_0 - 0x25))))) | (((UINT64)prm_1 & 0xFF) << (8 * (prm_0 - 0x25)));
+			break;
+
+		case 0x30:
+		case 0x31:
+			EMAC_MAXF = (EMAC_MAXF & ((prm_0 & 1) ? 0x00ff : 0xff00)) | ((prm_1 & 0xFF) << (8 * (prm_0 & 1)));
 			break;
 
 		case 0x60:
@@ -573,6 +591,20 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x14:
 		case 0x15:
 			return intpr[prm_0-0x10];
+			break;
+
+		case 0x25:
+		case 0x26:
+		case 0x27:
+		case 0x28:
+		case 0x29:
+		case 0x2a:
+			return (emacaddr >> (8 * (prm_0 - 0x25))) & 0xFF;
+			break;
+
+		case 0x30:
+		case 0x31:
+			return (EMAC_MAXF >> (8 * (prm_0 & 1))) & 0xFF;
 			break;
 
 		case 0x60:
