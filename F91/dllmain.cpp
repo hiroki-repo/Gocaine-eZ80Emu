@@ -51,7 +51,6 @@ void (*cpu_int)(int);
 void (*cpu_reset)(void);
 int (*cpu_execute)(void);
 int externaltime = 0;
-int externaltimed4 = 0;
 char* fname4if;
 UINT8 ramaubr = 0xFF;
 UINT8 ramcr = 0xC0;
@@ -293,8 +292,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             }
         } else if ((flashaubr <= ((prm_0 >> 16) & 0xFF)) && (((flashaubr+3)&0xFF) >= ((prm_0 >> 16) & 0xFF)) && ((flashcr & 0x08) != 0)) {
 			externaltime += (flashcr >> 5);
-			externaltimed4 += ((51 * flashfdr) / 10);
-			if ((externaltimed4 / 20) > 0) { externaltime++; externaltimed4 = 0; }
 			if (fname4if == nullptr) { return 0; }
 			if ((&fname4if) == NULL) { return 0; }
 			fseek(flashfdcrpt,(prm_0 - (flashaubr << 16)),SEEK_SET);
@@ -303,7 +300,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			case 0:
 				if (((flashwepr >> ((prm_0 - (flashaubr << 16)) >> 15))&1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); }
 			case 1:
-				ret = fgetc(flashfdcrpt);
+				return fgetc(flashfdcrpt);//ret = fgetc(flashfdcrpt);
 			}
 			return ret;
 		}
@@ -520,8 +517,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			break;
 		case 0xf6:
 			externaltime += flashfdr;
-			externaltimed4 += ((51 * flashfdr) / 10);
-			if ((externaltimed4 / 20) > 0) { externaltime++; externaltimed4 = 0; }
 			if (fname4if == nullptr) { return 0; }
 			if (&fname4if == NULL) { return 0; }
 			//flashfdcrpt = fopen(fname4if, "rb+");
@@ -786,8 +781,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 
 		case 0xf6:
 			externaltime += flashfdr;
-			externaltimed4 += ((51 * flashfdr) / 10);
-			if ((externaltimed4 / 20) > 0) { externaltime++; externaltimed4 = 0; }
 			if (fname4if == nullptr) { return 0; }
 			if (&fname4if == NULL) { return 0; }
 			//flashfdcrpt = fopen(fname4if, "rb+");
