@@ -194,7 +194,7 @@ void f91_pit(void) {
 
 __declspec(dllexport) int f91_execute(void) { UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute(); clockstocktmp += externaltime; clockstock += clockstocktmp; f91_pit(); return clockstocktmp; }
 
-__declspec(dllexport) int f91_execute_cc(UINT32 prm_0) { UINT32 clockstocktmp2 = 0; while(clockstocktmp2 < prm_0){ UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute() + externaltime; clockstock += clockstocktmp; f91_pit(); clockstocktmp2 += clockstocktmp; } return clockstocktmp2; }
+__declspec(dllexport) int f91_execute_cc(UINT32 prm_0) { UINT32 clockstocktmp2 = 0; while(clockstocktmp2 < prm_0){ UINT32 clockstocktmp = 0; cpuinterruptbak = 0; externaltime = 0; clockstocktmp = cpu_execute(); clockstocktmp += externaltime; clockstock += clockstocktmp; f91_pit(); clockstocktmp2 += clockstocktmp; } return clockstocktmp2; }
 
 __declspec(dllexport) void f91_reset(void) { 
 	
