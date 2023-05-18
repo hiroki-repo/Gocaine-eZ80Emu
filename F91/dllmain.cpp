@@ -561,7 +561,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			}
 			if (prm_1 & 1) {
 				pointer4accflash = 0;
-				for (int cnt = 0; cnt < 2048; cnt++) {
+				for (int cnt = 0; cnt < (256 * 1024); cnt++) {
 					fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 					if ((((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) && ((flashptr[0] & 0x80) ? true : ((pointer4accflash % 2048) >= 512))) { fputc((0), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f91cpu_int(0x50); } }
 					else { flashicr |= 0x1; if (flashicr & 0x40) { f91cpu_int(0x50); } }
