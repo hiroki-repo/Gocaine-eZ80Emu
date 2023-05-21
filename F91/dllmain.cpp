@@ -107,6 +107,8 @@ BOOL UARTx_DR[2];
 
 UINT8 UARTx_MCTL[2];
 
+UINT8 UARTx_SPR[2];
+
 const UINT8 UARTx_tlpos[4] = { 1,4,8,14 };
 const UINT8 UARTx_prior1[8] = { 5,4,1,0,7,3,2,6 };
 const UINT8 UARTx_prior2[8] = { 3,2,6,5,1,0,7,4 };
@@ -327,6 +329,9 @@ __declspec(dllexport) void f91_reset(void) {
 
 	UARTx_DR[0] = false;
 	UARTx_DR[1] = false;
+
+	UARTx_SPR[0] = 0;
+	UARTx_SPR[1] = 0;
 
 	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_DR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	for (int i = 0; i < 16; i++) { UARTx_FIFOBuffer[0][0][i] = 0; UARTx_FIFOBuffer[1][0][i] = 0; UARTx_FIFOBuffer[0][1][i] = 0; UARTx_FIFOBuffer[1][1][i] = 0; }
@@ -590,6 +595,10 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			if ((f91UARTDTR[0] != nullptr)) { f91UARTDTR[0]((prm_1 & 1) ? false : true); }
 			break;
 
+		case 0xc7:
+			UARTx_SPR[0] = prm_1;
+			break;
+
 		case 0xce:
 		case 0xcf:
 			GPIO[prm_0 - 0xcc][4] = prm_1;
@@ -613,6 +622,10 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			UARTx_MCTL[1] = prm_1 & 0x7F;
 			if ((f91UARTRTS[1] != nullptr)) { f91UARTRTS[1]((prm_1 & 2) ? false : true); }
 			if ((f91UARTDTR[1] != nullptr)) { f91UARTDTR[1]((prm_1 & 1) ? false : true); }
+			break;
+
+		case 0xd7:
+			UARTx_SPR[1] = prm_1;
 			break;
 
 		case 0xf5:
@@ -906,6 +919,9 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0xc6:
 			return (((!(UARTx_MCTL[0] & 16)) ? ((f91UARTCTS[0] != nullptr) ? (f91UARTCTS[0]((UARTx_MCTL[0] & 2) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[0] & 2) ? 1 : 0)) << 4) | (((!(UARTx_MCTL[0] & 16)) ? ((f91UARTDSR[0] != nullptr) ? (f91UARTDSR[0]((UARTx_MCTL[0] & 1) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[0] & 1) ? 1 : 0)) << 5) | (((!(UARTx_MCTL[0] & 16)) ? ((f91UARTRI[0] != nullptr) ? (f91UARTRI[0]((UARTx_MCTL[0] & 4) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[0] & 4) ? 1 : 0)) << 6) | (((!(UARTx_MCTL[0] & 16)) ? ((f91UARTDCD[0] != nullptr) ? (f91UARTDCD[0]((UARTx_MCTL[0] & 8) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[0] & 8) ? 1 : 0)) << 7);
 			break;
+		case 0xc7:
+			return UARTx_SPR[0];
+			break;
 
 		case 0xd0:
 			if (UARTx_LCTL[1] & 128) { return (UARTx_BRG[1] >> (8 * 0)) & 0xFF; }
@@ -931,6 +947,9 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			break;
 		case 0xd6:
 			return (((!(UARTx_MCTL[1] & 16)) ? ((f91UARTCTS[1] != nullptr) ? (f91UARTCTS[1]((UARTx_MCTL[1] & 2) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[1] & 2) ? 1 : 0)) << 4) | (((!(UARTx_MCTL[1] & 16)) ? ((f91UARTDSR[1] != nullptr) ? (f91UARTDSR[1]((UARTx_MCTL[1] & 1) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[1] & 1) ? 1 : 0)) << 5) | (((!(UARTx_MCTL[1] & 16)) ? ((f91UARTRI[1] != nullptr) ? (f91UARTRI[1]((UARTx_MCTL[1] & 4) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[1] & 4) ? 1 : 0)) << 6) | (((!(UARTx_MCTL[1] & 16)) ? ((f91UARTDCD[1] != nullptr) ? (f91UARTDCD[1]((UARTx_MCTL[1] & 8) ? false : true) ? 1 : 0) : 0) : ((UARTx_MCTL[1] & 8) ? 1 : 0)) << 7);
+			break;
+		case 0xd7:
+			return UARTx_SPR[1];
 			break;
 
 		case 0xf6:
