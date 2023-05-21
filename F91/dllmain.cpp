@@ -896,7 +896,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 
 		case 0xc0:
 			if (UARTx_LCTL[0] & 128) { return (UARTx_BRG[0] >> (8 * 0)) & 0xFF; }
-			else { if ((f91UARTRTS[0] != nullptr) && (!(UARTx_MCTL[0] & 16))) { f91UARTRTS[0]((UARTx_MCTL[0] & 2) ? false : true); } if (UARTx_FCTL[0] & 1) { UINT8 UARTretBUFF1b = UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0]; memmove(&UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], &UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], (UARTx_FIFOPos[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]--)); if (UARTx_FIFOPos[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) { UARTx_DR[0] = false; } return UARTretBUFF1b; } else { UARTx_valueof1ByteBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] = false; UARTx_DR[0] = false; return UARTx_1ByteBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]; } }
+			else { if ((f91UARTRTS[0] != nullptr) && (!(UARTx_MCTL[0] & 16))) { f91UARTRTS[0](UARTx_DR[0]); } if (UARTx_FCTL[0] & 1) { UINT8 UARTretBUFF1b = UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0]; memmove(&UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], &UARTx_FIFOBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], (UARTx_FIFOPos[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]--)); if (UARTx_FIFOPos[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) { UARTx_DR[0] = false; } return UARTretBUFF1b; } else { UARTx_valueof1ByteBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] = false; UARTx_DR[0] = false; return UARTx_1ByteBuffer[0][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]; } }
 			break;
 		case 0xc1:
 			if (UARTx_LCTL[0] & 128) { return (UARTx_BRG[0] >> (8 * 1)) & 0xFF; }
@@ -914,6 +914,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return UARTx_MCTL[0];
 			break;
 		case 0xc5:
+			if ((f91UARTRTS[0] != nullptr)) { f91UARTRTS[0](UARTx_DR[0]); }
 			return ((UARTx_FCTL[0] & 1) ? ((UARTx_FIFOPos[0][1 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) ? 0 : 64) : ((UARTx_valueof1ByteBuffer[0][1 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]) ? 0 : 64)) | ((UARTx_FCTL[0] & 1) ? ((UARTx_FIFOPos[0][1 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) ? 0 : 32) : ((UARTx_valueof1ByteBuffer[0][1 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]) ? 0 : 32)) | (UARTx_DR[0] ? 1 : 0 );
 			break;
 		case 0xc6:
@@ -925,7 +926,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 
 		case 0xd0:
 			if (UARTx_LCTL[1] & 128) { return (UARTx_BRG[1] >> (8 * 0)) & 0xFF; }
-			else { if ((f91UARTRTS[1] != nullptr) && (!(UARTx_MCTL[1] & 16))) { f91UARTRTS[1]((UARTx_MCTL[1] & 2) ? false : true); } if (UARTx_FCTL[1] & 1) { UINT8 UARTretBUFF1b = UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0]; memmove(&UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], &UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], (UARTx_FIFOPos[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]--)); if (UARTx_FIFOPos[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) { UARTx_DR[1] = false; } return UARTretBUFF1b; } else { UARTx_valueof1ByteBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] = false; UARTx_DR[1] = false; return UARTx_1ByteBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]; } }
+			else { if ((f91UARTRTS[1] != nullptr) && (!(UARTx_MCTL[1] & 16))) { f91UARTRTS[1](UARTx_DR[1]); } if (UARTx_FCTL[1] & 1) { UINT8 UARTretBUFF1b = UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0]; memmove(&UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], &UARTx_FIFOBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)][0], (UARTx_FIFOPos[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]--)); if (UARTx_FIFOPos[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] == 0) { UARTx_DR[1] = false; } return UARTretBUFF1b; } else { UARTx_valueof1ByteBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)] = false; UARTx_DR[1] = false; return UARTx_1ByteBuffer[1][0 ^ ((UARTx_MCTL[0] & 16) ? 1 : 0)]; } }
 			break;
 		case 0xd1:
 			if (UARTx_LCTL[1] & 128) { return (UARTx_BRG[1] >> (8 * 1)) & 0xFF; }
@@ -943,6 +944,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return UARTx_MCTL[1];
 			break;
 		case 0xd5:
+			if ((f91UARTRTS[1] != nullptr)) { f91UARTRTS[1](UARTx_DR[1]); }
 			return ((UARTx_FCTL[1] & 1) ? ((UARTx_FIFOPos[1][1 ^ ((UARTx_MCTL[1] & 16) ? 1 : 0)] == 0) ? 0 : 64) : ((UARTx_valueof1ByteBuffer[1][1 ^ ((UARTx_MCTL[1] & 16) ? 1 : 0)]) ? 0 : 64)) | ((UARTx_FCTL[1] & 1) ? ((UARTx_FIFOPos[1][1 ^ ((UARTx_MCTL[1] & 16) ? 1 : 0)] == 0) ? 0 : 32) : ((UARTx_valueof1ByteBuffer[1][1 ^ ((UARTx_MCTL[1] & 16) ? 1 : 0)]) ? 0 : 32)) | (UARTx_DR[1] ? 1 : 0);
 			break;
 		case 0xd6:
