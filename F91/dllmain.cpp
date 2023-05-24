@@ -109,6 +109,8 @@ UINT8 UARTx_MCTL[2];
 
 UINT8 UARTx_SPR[2];
 
+UINT8 FLASH_KEY_step = 0;
+
 const UINT8 UARTx_tlpos[4] = { 1,4,8,14 };
 const UINT8 UARTx_prior1[8] = { 5,4,1,0,7,3,2,6 };
 const UINT8 UARTx_prior2[8] = { 3,2,6,5,1,0,7,4 };
@@ -332,6 +334,8 @@ __declspec(dllexport) void f91_reset(void) {
 
 	UARTx_SPR[0] = 0;
 	UARTx_SPR[1] = 0;
+
+	FLASH_KEY_step = 0;
 
 	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_DR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	for (int i = 0; i < 16; i++) { UARTx_FIFOBuffer[0][0][i] = 0; UARTx_FIFOBuffer[1][0][i] = 0; UARTx_FIFOBuffer[0][1][i] = 0; UARTx_FIFOBuffer[1][1][i] = 0; }
@@ -629,6 +633,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			break;
 
 		case 0xf5:
+			FLASH_KEY_step = (FLASH_KEY_step == 0) ? ((prm_1 == 0xb6) ? 1 : 0) : (FLASH_KEY_step == 1) ? ((prm_1 == 0x49) ? 2 : 0) : 0;
 			break;
 		case 0xf6:
 			externaltime += flashfdr;
@@ -650,10 +655,17 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			flashcr = prm_1 & 0xE8;
 			break;
 		case 0xf9:
-			flashfdr = prm_1;
+			if (FLASH_KEY_step >= 2) {
+				flashfdr = prm_1;
+			}
 			break;
 		case 0xfa:
-			flashwepr = prm_1;
+			if (FLASH_KEY_step >= 2) {
+				flashwepr = prm_1;
+			}
+			else {
+				flashwepr = 0xff;
+			}
 			break;
 		case 0xfb:
 			flashicr = prm_1 & 0xC0;
