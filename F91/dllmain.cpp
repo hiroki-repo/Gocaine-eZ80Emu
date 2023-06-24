@@ -111,6 +111,34 @@ UINT8 UARTx_SPR[2];
 
 UINT8 FLASH_KEY_step = 0;
 
+UINT8 EMAC_TEST = 0;
+UINT32 EMAC_CFG = 0x000f3700;
+UINT16 EMAC_TPTV = 0;
+UINT8 EMAC_IPGT = 0x15;
+UINT8 EMAC_IPGR[2] = { 0x0c,0x12 };
+UINT8 EMAC_AFR = 0;
+UINT64 EMAC_HTBL = 0;
+UINT8 EMAC_MIIMGT = 0;
+UINT16 EMAC_CTLD = 0;
+UINT8 EMAC_RGAD = 0;
+UINT8 EMAC_FIAD = 0;
+UINT8 EMAC_PTMR = 0;
+UINT8 EMAC_RST = 0x20;
+UINT16 EMAC_TLBP = 0;
+UINT32 EMAC_BP = 0xffc000;
+UINT16 EMAC_RHBP = 0;
+UINT16 EMAC_RRP = 0;
+UINT8 EMAC_BUFSZ = 0;
+UINT8 EMAC_IEN = 0;
+UINT8 EMAC_ISTAT = 0;
+UINT16 EMAC_PRSD = 0;
+UINT8 EMAC_MIISTAT = 0;
+UINT16 EMAC_RWP = 0;
+UINT16 EMAC_TRP = 0;
+UINT16 EMAC_BLKSLFT = 0x0020;
+UINT16 EMAC_FDATA = 0x0000;
+UINT8 EMAC_FFLAGS = 0x33;
+
 const UINT8 UARTx_tlpos[4] = { 1,4,8,14 };
 const UINT8 UARTx_prior1[8] = { 5,4,1,0,7,3,2,6 };
 const UINT8 UARTx_prior2[8] = { 3,2,6,5,1,0,7,4 };
@@ -337,6 +365,35 @@ __declspec(dllexport) void f91_reset(void) {
 
 	FLASH_KEY_step = 0;
 
+	EMAC_TEST = 0;
+	EMAC_CFG = 0x000f3700;
+	EMAC_TPTV = 0;
+	EMAC_IPGT = 0x15;
+	EMAC_IPGR[0] = 0x0c;
+	EMAC_IPGR[0] = 0x12;
+	EMAC_AFR = 0;
+	EMAC_HTBL = 0;
+	EMAC_MIIMGT = 0;
+	EMAC_CTLD = 0;
+	EMAC_RGAD = 0;
+	EMAC_FIAD = 0;
+	EMAC_PTMR = 0;
+	EMAC_RST = 0x20;
+	EMAC_TLBP = 0;
+	EMAC_BP = 0xffc000;
+	EMAC_RHBP = 0;
+	EMAC_RRP = 0;
+	EMAC_BUFSZ = 0;
+	EMAC_IEN = 0;
+	EMAC_ISTAT = 0;
+	EMAC_PRSD = 0;
+	EMAC_MIISTAT = 0;
+	EMAC_RWP = 0;
+	EMAC_TRP = 0;
+	EMAC_BLKSLFT = 0x0020;
+	EMAC_FDATA = 0x0000;
+	EMAC_FFLAGS = 0x33;
+
 	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_DR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	for (int i = 0; i < 16; i++) { UARTx_FIFOBuffer[0][0][i] = 0; UARTx_FIFOBuffer[1][0][i] = 0; UARTx_FIFOBuffer[0][1][i] = 0; UARTx_FIFOBuffer[1][1][i] = 0; }
 	cpu_reset();
@@ -392,6 +449,15 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			intpr[prm_0 - 0x10] = prm_1;
 			break;
 
+		case 0x20:
+			EMAC_TEST = prm_1&0x7F;
+			break;
+		case 0x21:
+		case 0x22:
+		case 0x23:
+		case 0x24:
+			EMAC_CFG = ((EMAC_CFG & (~(0xFF << (8 * prm_0 - 0x21)))) | ((prm_1 & ((prm_0 == 0x24) ? 0x7F : 0xFF)) << (8 * prm_0 - 0x21)));
+			break;
 		case 0x25:
 		case 0x26:
 		case 0x27:
@@ -400,10 +466,83 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x2a:
 			emacaddr = (emacaddr & (~(255 << (8 * (prm_0 - 0x25))))) | (((UINT64)prm_1 & 0xFF) << (8 * (prm_0 - 0x25)));
 			break;
-
+		case 0x2b:
+		case 0x2c:
+			EMAC_TPTV = (EMAC_TPTV & ((prm_0 - 0x2b) == 0 ? 0xff00 : 0x00ff)) | ((prm_1 & 0xff) << (8 * (prm_0 - 0x2b)));
+			break;
+		case 0x2d:
+			EMAC_IPGT = prm_1 & 0x7f;
+			break;
+		case 0x2e:
+		case 0x2f:
+			EMAC_IPGR[prm_0 - 0x2e] = prm_1 & (prm_0 == 0x2f ? 0x7f : 0xff);
+			break;
 		case 0x30:
 		case 0x31:
 			EMAC_MAXF = (EMAC_MAXF & ((prm_0 & 1) ? 0x00ff : 0xff00)) | ((prm_1 & 0xFF) << (8 * (prm_0 & 1)));
+			break;
+		case 0x32:
+			EMAC_AFR = prm_1 & 0x0f;
+			break;
+		case 0x33:
+		case 0x34:
+		case 0x35:
+		case 0x36:
+		case 0x37:
+		case 0x38:
+		case 0x39:
+		case 0x3a:
+			EMAC_HTBL = (EMAC_HTBL & ((UINT64)(~(0xff << (8 * (prm_0 - 0x33)))))) | (((UINT64)prm_1 & 0xFF) << (8 * (prm_0 - 0x33)));
+			break;
+		case 0x3b:
+			EMAC_MIIMGT = prm_1;
+			break;
+		case 0x3c:
+		case 0x3d:
+			EMAC_CTLD = (EMAC_CTLD & ((prm_0 & 1) == 0 ? 0xff00 : 0x00ff)) | ((prm_1 & 0xff) << (8 * (prm_0 & 1)));
+			break;
+		case 0x3e:
+			EMAC_RGAD = prm_1 & 0x1f;
+			break;
+		case 0x3f:
+			EMAC_FIAD = prm_1 & 0x1f;
+			break;
+		case 0x40:
+			EMAC_PTMR = prm_1;
+			break;
+		case 0x41:
+			EMAC_RST = prm_1 & 0x3f;
+			break;
+		case 0x42:
+		case 0x43:
+			EMAC_TLBP = (EMAC_TLBP & ((prm_0 & 1) == 0 ? 0xff00 : 0xe0ff)) | ((prm_1 & (prm_0 == 0x42 ? 0xe0 : 0x1f)) << (8 * (prm_0 & 1)));
+			break;
+		case 0x44:
+		case 0x45:
+		//case 0x46:
+			EMAC_BP = (EMAC_BP & ((UINT64)(~((prm_0 == 0x45 ? 0x1f : 0xff) << (8 * (prm_0 - 0x44)))))) | (((UINT64)prm_1 & (prm_0 == 0x45 ? 0x1f : prm_0 == 0x44 ? 0xe0 : 0xFF)) << (8 * (prm_0 - 0x44)));
+			break;
+		case 0x47:
+		case 0x48:
+			EMAC_RHBP = (EMAC_RHBP & ((prm_0 - 0x47) == 0 ? 0xff00 : 0xe0ff)) | ((prm_1 & (prm_0 == 0x47 ? 0xe0 : 0x1f)) << (8 * (prm_0 - 0x47)));
+			break;
+		case 0x49:
+		case 0x4a:
+			EMAC_RRP = (EMAC_RRP & ((prm_0 - 0x49) == 0 ? 0xff00 : 0x00ff)) | ((prm_1 & (prm_0 == 0x49 ? 0xe0 : 0x1f)) << (8 * (prm_0 - 0x49)));
+			break;
+		case 0x4b:
+			EMAC_BUFSZ = prm_1;
+			break;
+		case 0x4c:
+			EMAC_IEN = prm_1;
+			break;
+		case 0x4d:
+			EMAC_ISTAT = prm_1;
+			break;
+
+		case 0x57:
+		case 0x58:
+			EMAC_FDATA = (EMAC_FDATA & ((prm_0 - 0x57) == 0 ? 0xff00 : 0x00ff)) | ((prm_1 & (prm_0 == 0x57 ? 0xff : 0x3)) << (8 * (prm_0 - 0x57)));
 			break;
 
 		case 0x60:
@@ -720,6 +859,15 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return intpr[prm_0-0x10];
 			break;
 
+		case 0x20:
+			EMAC_TEST = prm_1 & 0x7F;
+			break;
+		case 0x21:
+		case 0x22:
+		case 0x23:
+		case 0x24:
+			return (EMAC_CFG >> (8 * (prm_0 - 0x21))) & 0xFF;
+			break;
 		case 0x25:
 		case 0x26:
 		case 0x27:
@@ -728,10 +876,104 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x2a:
 			return (emacaddr >> (8 * (prm_0 - 0x25))) & 0xFF;
 			break;
-
+		case 0x2b:
+		case 0x2c:
+			return (EMAC_TPTV >> (8 * (prm_0 - 0x2b))) & 0xFF;
+			break;
+		case 0x2d:
+			return EMAC_IPGT & 0xff;
+			break;
+		case 0x2e:
+		case 0x2f:
+			return EMAC_IPGR[prm_0 - 0x2e] & 0xff;
+			break;
 		case 0x30:
 		case 0x31:
 			return (EMAC_MAXF >> (8 * (prm_0 & 1))) & 0xFF;
+			break;
+		case 0x32:
+			return EMAC_AFR & 0xff;
+			break;
+		case 0x33:
+		case 0x34:
+		case 0x35:
+		case 0x36:
+		case 0x37:
+		case 0x38:
+		case 0x39:
+		case 0x3a:
+			return (EMAC_HTBL >> (8 * (prm_0 & 1))) & 0xFF;
+			break;
+		case 0x3b:
+			return EMAC_MIIMGT & 0xff;
+			break;
+		case 0x3c:
+		case 0x3d:
+			return (EMAC_CTLD >> (8 * (prm_0 & 1))) & 0xFF;
+			break;
+		case 0x3e:
+			return EMAC_RGAD & 0xff;
+			break;
+		case 0x3f:
+			return EMAC_FIAD & 0xff;
+			break;
+		case 0x40:
+			return EMAC_PTMR & 0xff;
+			break;
+		case 0x41:
+			return EMAC_RST & 0xff;
+			break;
+		case 0x42:
+		case 0x43:
+			return (EMAC_TLBP >> (8 * (prm_0 - 0x42))) & 0xFF;
+			break;
+		case 0x44:
+		case 0x45:
+		case 0x46:
+			return (EMAC_BP >> (8 * (prm_0 - 0x44))) & 0xFF;
+			break;
+		case 0x47:
+		case 0x48:
+			return (EMAC_RHBP >> (8 * (prm_0 - 0x47))) & 0xFF;
+			break;
+		case 0x49:
+		case 0x4a:
+			return (EMAC_RRP >> (8 * (prm_0 - 0x49))) & 0xFF;
+			break;
+		case 0x4b:
+			return EMAC_BUFSZ & 0xff;
+			break;
+		case 0x4c:
+			return EMAC_IEN & 0xff;
+			break;
+		case 0x4d:
+			return EMAC_ISTAT & 0xff;
+			break;
+		case 0x4e:
+		case 0x4f:
+			return (EMAC_PRSD >> (8 * (prm_0 - 0x4e))) & 0xFF;
+			break;
+		case 0x50:
+			return EMAC_MIISTAT & 0xff;
+			break;
+		case 0x51:
+		case 0x52:
+			return (EMAC_RWP >> (8 * (prm_0 - 0x51))) & 0xFF;
+			break;
+		case 0x53:
+		case 0x54:
+			return (EMAC_TRP >> (8 * (prm_0 - 0x53))) & 0xFF;
+			break;
+		case 0x55:
+		case 0x56:
+			return (EMAC_BLKSLFT >> (8 * (prm_0 - 0x55))) & 0xFF;
+			break;
+		case 0x57:
+		case 0x58:
+			return (EMAC_FDATA >> (8 * (prm_0 - 0x57))) & 0xFF;
+			break;
+		case 0x59:
+			return EMAC_FFLAGS & 0xff;
 			break;
 
 		case 0x60:
