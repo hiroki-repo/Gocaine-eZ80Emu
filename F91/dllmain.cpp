@@ -235,7 +235,7 @@ if (flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 
 void f91_pit(void) {
 	if (PLL_CTL1 & 1) {
-		if (((clockstock / PLL_DIV) % (8 << ((PLL_CTL0 >> 2) & 1))) == 0) {
+		if (((clockstock / PLL_DIV) % (4 << ((PLL_CTL0 >> 2) & 1))) == 0) {
 			PLL_CTL1 ^= 32;
 			if ((PLL_CTL1 & 4) && ((PLL_CTL1 & 32) != 0)) { f91cpu_int(0x4c); }
 			else if ((PLL_CTL1 & 2) && ((PLL_CTL1 & 32) == 0)) { f91cpu_int(0x4c); }
