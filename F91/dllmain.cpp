@@ -250,11 +250,17 @@ void f91_pit(void) {
 					TMRx_DR[cnt]--;
 				if (TMRx_DR[cnt] == 0) { if (!(TMRx_CTR[cnt] & 4)) { TMRx_CTR[cnt] &= 0xFE; } TMRx_IIR[cnt] |= 1; if (TMRx_IER[cnt] & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
 				for (int cnt2 = 0; cnt2 < 4; cnt2++) {
-					if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+					if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMR3_OCx[cnt2] = 0; TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
+					else if ((TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMR3_OCx[cnt2] = 0; }
 				}
 				if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0))) {
 					TMRx_DR[cnt] = TMRx_RR[cnt];
 				}
+			}
+		}
+		else {
+			for (int cnt2 = 0; cnt2 < 4; cnt2++) {
+				if ((TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMR3_OCx[cnt2] = 0; }
 			}
 		}
 	}
@@ -1128,6 +1134,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0xa3:
 		case 0xa4:
 		case 0xa5:
+			if ((((prm_0 - 0x96) % 4) == 0) && (f91gpioack != nullptr)) { f91gpioack((prm_0 - 0x96) / 4); }
 			return GPIO[(prm_0 - 0x96) / 4][(prm_0 - 0x96) % 4];
 			break;
 
