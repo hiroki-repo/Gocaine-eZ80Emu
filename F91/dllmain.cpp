@@ -139,7 +139,7 @@ UINT16 EMAC_BLKSLFT = 0x0020;
 UINT16 EMAC_FDATA = 0x0000;
 UINT8 EMAC_FFLAGS = 0x33;
 
-UINT16 PLL_DIV = 0;
+UINT16 PLL_DIV = 2;
 UINT8 PLL_CTL0 = 0;
 UINT8 PLL_CTL1 = 0;
 
@@ -235,7 +235,7 @@ if (flashfdcrpt == 0) { flashfdcrpt = fopen(fname4if, "wb"); }
 
 void f91_pit(void) {
 	if (PLL_CTL1 & 1) {
-		if (((clockstock / PLL_DIV) % (4 << ((PLL_CTL0 >> 2) & 1))) == 0) {
+		if (((clockstock / ((PLL_DIV + 1) * (((PLL_CTL0 >> 2) & 1) ? 20 : 1))) % (4 << ((PLL_CTL0 >> 2) & 1))) == 0) {
 			PLL_CTL1 ^= 32;
 			if ((PLL_CTL1 & 4) && ((PLL_CTL1 & 32) != 0)) { f91cpu_int(0x4c); }
 			else if ((PLL_CTL1 & 2) && ((PLL_CTL1 & 32) == 0)) { f91cpu_int(0x4c); }
@@ -405,7 +405,7 @@ __declspec(dllexport) void f91_reset(void) {
 	EMAC_FDATA = 0x0000;
 	EMAC_FFLAGS = 0x33;
 
-	PLL_DIV = 0;
+	PLL_DIV = 2;
 	PLL_CTL0 = 0;
 	PLL_CTL1 = 0;
 
