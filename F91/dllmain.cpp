@@ -253,9 +253,10 @@ void f91_pit(void) {
 					if (((TMRx_IER[cnt] >> (3 + cnt2)) & 1) && (TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMR3_OCx[cnt2] = 0; TMRx_IIR[cnt] |= (1 << (3 + cnt2)); if ((TMRx_IER[cnt] >> (3 + cnt2)) & 1) { f91cpu_int(0x54 + (cnt * 4)); } }
 					else if ((TMRx_DR[cnt] == TMR3_OCx[cnt2]) && (TMR3_OC_CTLx[0] & 1)) { TMR3_OCx[cnt2] = 0; }
 				}
-				/*if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0))) {
+				if (TMRx_IIR[cnt] != 0) { f91cpu_int(0x54 + (cnt * 4)); }
+				if (((TMRx_CTR[cnt] & 4) && (TMRx_DR[cnt] == 0))) {
 					TMRx_DR[cnt] = TMRx_RR[cnt];
-				}*/
+				}
 			}
 		}
 		else {
@@ -1024,9 +1025,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return TMRx_IER[0];
 			break;
 		case 0x62:
-			if (((TMRx_CTR[0] & 4) && (TMRx_DR[0] == 0))) {
-				TMRx_DR[0] = TMRx_RR[0];
-			}
 		{UINT8 iirtmp = TMRx_IIR[0]; TMRx_IIR[0] = 0; return iirtmp; }
 			break;
 		case 0x63:
@@ -1042,9 +1040,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return TMRx_IER[1];
 			break;
 		case 0x67:
-			if (((TMRx_CTR[1] & 4) && (TMRx_DR[1] == 0))) {
-				TMRx_DR[1] = TMRx_RR[1];
-			}
 		{UINT8 iirtmp = TMRx_IIR[1]; TMRx_IIR[1] = 0; return iirtmp; }
 			break;
 		case 0x68:
@@ -1070,9 +1065,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return TMRx_IER[2];
 			break;
 		case 0x71:
-			if (((TMRx_CTR[2] & 4) && (TMRx_DR[2] == 0))) {
-				TMRx_DR[2] = TMRx_RR[2];
-			}
 		{UINT8 iirtmp = TMRx_IIR[2]; TMRx_IIR[2] = 0; return iirtmp; }
 			break;
 		case 0x72:
@@ -1088,9 +1080,6 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			return TMRx_IER[3];
 			break;
 		case 0x76:
-			if (((TMRx_CTR[3] & 4) && (TMRx_DR[3] == 0))) {
-				TMRx_DR[3] = TMRx_RR[3];
-			}
 		{UINT8 iirtmp = TMRx_IIR[3]; TMRx_IIR[3] = 0; return iirtmp; }
 			break;
 		case 0x77:
