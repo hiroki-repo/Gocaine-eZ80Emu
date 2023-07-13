@@ -1275,7 +1275,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
             return spicr;
             break;
 		case 0xbb:
-			return spisr = 0;
+			ret = spisr; spisr = 0; return ret;
 			break;
         case 0xbc:
             ret = buf4rt[0];
