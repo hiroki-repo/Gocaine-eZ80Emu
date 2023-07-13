@@ -143,6 +143,12 @@ UINT16 PLL_DIV = 2;
 UINT8 PLL_CTL0 = 0;
 UINT8 PLL_CTL1 = 0;
 
+UINT8 PWM_CTL1 = 0;
+UINT8 PWM_CTL2 = 0;
+UINT8 PWM_CTL3 = 0;
+
+UINT16 PWMxx[8] = { 0,0,0,0,0,0,0,0 };
+
 const UINT8 UARTx_tlpos[4] = { 1,4,8,14 };
 const UINT8 UARTx_prior1[8] = { 5,4,1,0,7,3,2,6 };
 const UINT8 UARTx_prior2[8] = { 3,2,6,5,1,0,7,4 };
@@ -416,6 +422,11 @@ __declspec(dllexport) void f91_reset(void) {
 	PLL_CTL0 = 0;
 	PLL_CTL1 = 0;
 
+	PWM_CTL1 = 0;
+	PWM_CTL2 = 0;
+	PWM_CTL3 = 0;
+
+	for (int i = 0; i < 8; i++) { PWMxx[i] = 0; }
 	for (int i = 0; i < 4; i++) { TMRx_CTR[i] = 0; TMRx_IER[i] = 0; TMRx_IIR[i] = 0; TMRx_DR[i] = 0; TMRx_RR[i] = 0; TMRx_CAP_CTL[i] = 0; TMRx_CAPA[i] = 0; TMR3_OCx[i] = 0; }
 	for (int i = 0; i < 16; i++) { UARTx_FIFOBuffer[0][0][i] = 0; UARTx_FIFOBuffer[1][0][i] = 0; UARTx_FIFOBuffer[0][1][i] = 0; UARTx_FIFOBuffer[1][1][i] = 0; }
 	cpu_reset();
@@ -653,25 +664,60 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x78:
 			TMRx_RR[3] = (TMRx_RR[3] & 0x00FF) | (prm_1 << (8 * 1));
 			break;
-
+		case 0x79:
+			PWM_CTL1 = prm_1;
+			break;
+		case 0x7a:
+			PWM_CTL2 = prm_1;
+			break;
 		case 0x7b:
-			TMRx_CAP_CTL[1] = prm_1;
+			if (PWM_CTL1 & 0x80) {
+				PWM_CTL3 = prm_1;
+			}
+			else {
+				TMRx_CAP_CTL[1] = prm_1;
+			}
 			break;
 		case 0x7c:
-			TMRx_CAPA[3] = (TMRx_CAPA[3] & 0xFF00) | (prm_1 << (8 * 0));
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMRx_CAPA[3] = (TMRx_CAPA[3] & 0xFF00) | (prm_1 << (8 * 0));
+			}
 			break;
 		case 0x7d:
-			TMRx_CAPA[3] = (TMRx_CAPA[3] & 0x00FF) | (prm_1 << (8 * 1));
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMRx_CAPA[3] = (TMRx_CAPA[3] & 0x00FF) | (prm_1 << (8 * 1));
+			}
 			break;
 		case 0x7e:
-			TMR1_CAPB = (TMR1_CAPB & 0xFF00) | (prm_1 << (8 * 0));
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMR1_CAPB = (TMR1_CAPB & 0xFF00) | (prm_1 << (8 * 0));
+			}
 			break;
 		case 0x7f:
-			TMR1_CAPB = (TMR1_CAPB & 0x00FF) | (prm_1 << (8 * 1));
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMR1_CAPB = (TMR1_CAPB & 0x00FF) | (prm_1 << (8 * 1));
+			}
 			break;
 		case 0x80:
 		case 0x81:
-			TMR3_OC_CTLx[prm_0 & 1] = prm_1;
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMR3_OC_CTLx[prm_0 & 1] = prm_1;
+			}
 			break;
 		case 0x82:
 		case 0x83:
@@ -681,7 +727,16 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x87:
 		case 0x88:
 		case 0x89:
-			TMR3_OCx[(prm_0 - 0x82) / 2] = (TMR3_OCx[(prm_0 - 0x82) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			if (PWM_CTL1 & 0x80) {
+				PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			else {
+				TMR3_OCx[(prm_0 - 0x82) / 2] = (TMR3_OCx[(prm_0 - 0x82) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
+			}
+			break;
+		case 0x8a:
+		case 0x8b:
+			PWMxx[(prm_0 - 0x7C) / 2] = (PWMxx[(prm_0 - 0x7C) / 2] & ((prm_0 & 1) ? 0x00FF : 0xFF00)) | ((prm_1 & 0xFF) << ((prm_0 & 1) * 8));
 			break;
 
 		case 0x96:
@@ -1088,25 +1143,60 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x78:
 			return (TMRx_DR[3] >> (8 * 1)) & 0xFF;
 			break;
-
+		case 0x79:
+			return PWM_CTL1;
+			break;
+		case 0x7a:
+			return PWM_CTL2;
+			break;
 		case 0x7b:
-			return TMRx_CAP_CTL[1];
+			if (PWM_CTL1 & 0x80) {
+				return PWM_CTL3;
+			}
+			else {
+				return TMRx_CAP_CTL[1];
+			}
 			break;
 		case 0x7c:
-			return (TMRx_CAPA[3] >> (8 * 0)) & 0xFF;
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return (TMRx_CAPA[3] >> (8 * 0)) & 0xFF;
+			}
 			break;
 		case 0x7d:
-			return (TMRx_CAPA[3] >> (8 * 1)) & 0xFF;
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return (TMRx_CAPA[3] >> (8 * 1)) & 0xFF;
+			}
 			break;
 		case 0x7e:
-			return (TMR1_CAPB >> (8 * 0)) & 0xFF;
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return (TMR1_CAPB >> (8 * 0)) & 0xFF;
+			}
 			break;
 		case 0x7f:
-			return (TMR1_CAPB >> (8 * 1)) & 0xFF;
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return (TMR1_CAPB >> (8 * 1)) & 0xFF;
+			}
 			break;
 		case 0x80:
 		case 0x81:
-			return TMR3_OC_CTLx[prm_0 & 1];
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return TMR3_OC_CTLx[prm_0 & 1];
+			}
 			break;
 		case 0x82:
 		case 0x83:
@@ -1116,7 +1206,16 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0x87:
 		case 0x88:
 		case 0x89:
-			return (TMR3_OCx[(prm_0 - 0x82) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			if (PWM_CTL1 & 0x80) {
+				return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			else {
+				return (TMR3_OCx[(prm_0 - 0x82) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
+			}
+			break;
+		case 0x8a:
+		case 0x8b:
+			return (PWMxx[(prm_0 - 0x7C) / 2] >> ((prm_0 & 1) * 8)) & 0xFF;
 			break;
 
 		case 0x96:
