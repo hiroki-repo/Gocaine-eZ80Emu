@@ -9,6 +9,7 @@
 #func cpu_int "cpu_int" int
 #func cpu_nmi "cpu_nmi"
 #func cpu_reset "cpu_reset"
+#func cpu_setinterrupt16 "cpu_setinterrupt16" int
 #func ez80macfuncset "ez80macfuncset" int
 #func control_reset "control_reset"
 #func control_restore "control_restore"
