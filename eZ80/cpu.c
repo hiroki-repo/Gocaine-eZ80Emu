@@ -841,6 +841,9 @@ __declspec(dllexport) int cpu_get_speed() { return ez80maxclock; }
 
 int intvector4int = 0;
 
+bool cpuadl16bitint = false;
+__declspec(dllexport) void cpu_setinterrupt16(bool prm_0) { cpuadl16bitint = prm_0; }
+
 __declspec(dllexport) int cpu_execute(void) {
     cpu.cycles = 0;
     /* variable declarations */
@@ -870,6 +873,7 @@ __declspec(dllexport) int cpu_execute(void) {
             cpu_prefetch_discard();
             cpu.cycles += 2;
             cpu.L = cpu.IL = cpu.ADL || cpu.MADL;
+            if (cpuadl16bitint == true) { cpu.L = false; }
             cpu.IEF1 = cpu.halted = cpu.inBlock = false;
 			intrpt->status = 0;
             if (cpu.NMI) {
