@@ -442,7 +442,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			ret = 0;
 			switch (prm_2) {
 			case 0:
-				if (((flashwepr >> ((prm_0 - (flashaubr << 16)) >> 15))&1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); }
+				if (((flashwepr >> ((prm_0 - (flashaubr << 16)) >> 14))&1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); }
 			case 1:
 				return fgetc(flashfdcrpt);//ret = fgetc(flashfdcrpt);
 			}
@@ -663,7 +663,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 			pointer4accflash = (((flashptr[0] & 0x7F) << 11) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 8) | ((flashptr[2] & 0xFF) << 0));
 			fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
 			flashptr[0] = (flashptr[0] & 0x80) | ((pointer4accflash >> 11) & 0x7F); flashptr[1] = (flashptr[1] & ((flashptr[0] & 0x80) ? 0xFE : 0xF8)) | ((pointer4accflash >> 8) & ((flashptr[0] & 0x80) ? 0x01 : 0x07)); flashptr[2] = ((pointer4accflash >> 0) & 0xFF);
-			if (((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } } else { flashicr |= 0x8; if (flashicr & 0x40) { f92cpu_int(0x08); } }
+			if (((flashwepr >> ((pointer4accflash) >> 14)) & 1) == 0) { fputc((prm_1 & 0xFF), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } } else { flashicr |= 0x8; if (flashicr & 0x40) { f92cpu_int(0x08); } }
 			//fclose(flashfdcrpt);
 			break;
 		case 0xf7:
@@ -699,7 +699,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 				pointer4accflash = (((flashptr[0] & 0x7F) << 10) | ((flashptr[1] & ((flashptr[0] & 0x80) ? 0x01 : 0x07)) << 7) | ((flashptr[2] & 0x7F) << 0));
 				for(int cnt = 0; cnt < 2048; cnt++) {
 					fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
-					if ((((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) && ((flashptr[0] & 0x80) ? ((pointer4accflash % 2048) < 512) : true)) { fputc((0xff), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } }
+					if ((((flashwepr >> ((pointer4accflash) >> 14)) & 1) == 0) && ((flashptr[0] & 0x80) ? ((pointer4accflash % 2048) < 512) : true)) { fputc((0xff), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } }
 					else { flashicr |= 0x2; if (flashicr & 0x40) { f92cpu_int(0x08); } }
 				}
 				if (!(flashicr & 2)) { flashpcr &= 0x5; }
@@ -708,7 +708,7 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 				pointer4accflash = 0;
 				for (int cnt = 0; cnt < (256 * 1024); cnt++) {
 					fseek(flashfdcrpt, pointer4accflash++, SEEK_SET);
-					if ((((flashwepr >> ((pointer4accflash) >> 15)) & 1) == 0) && ((flashptr[0] & 0x80) ? true : ((pointer4accflash % 2048) >= 512))) { fputc((0xff), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } }
+					if ((((flashwepr >> ((pointer4accflash) >> 14)) & 1) == 0) && ((flashptr[0] & 0x80) ? true : ((pointer4accflash % 2048) >= 512))) { fputc((0xff), flashfdcrpt); flashicr |= 0x20; if (flashicr & 0x80) { f92cpu_int(0x08); } }
 					else { flashicr |= 0x1; if (flashicr & 0x40) { f92cpu_int(0x08); } }
 				}
 				if (!(flashicr & 1)) { flashpcr &= 0x6; }
