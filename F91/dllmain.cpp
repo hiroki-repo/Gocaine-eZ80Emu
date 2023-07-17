@@ -160,7 +160,7 @@ typeof_f91sendsignal* f91UARTDCD;
 typeof_f91sendsignal* f91UARTDSR;
 typeof_f91sendsignal* f91UARTRI;
 
-void f91cpu_int(int prm_0) { if (intrpt != nullptr) { if (intrpt->status == 0) { cpuinterruptbak = 0; } } if (cpuinterruptbak >= ((prm_0) | (((prm_0 >= 0x40) && (prm_0 <= 0xFF)) ? (((intpr[(prm_0 - 0x40) / 8] >> (prm_0 % 8)) & 1) ? 0 : 0x100) : 0x100))) { cpu_int(prm_0); cpuinterruptbak = ((prm_0) | (((prm_0 >= 0x40) && (prm_0 <= 0xFF)) ? (((intpr[(prm_0 - 0x40) / 8] >> (prm_0 % 8)) & 1) ? 0 : 0x100) : 0x100)); } }
+void f91cpu_int(int prm_0) { if (intrpt != nullptr) { if (intrpt->status == 0) { cpuinterruptbak = 0; } } if (cpuinterruptbak <= ((prm_0) | (((prm_0 >= 0x40) && (prm_0 <= 0xFF)) ? (((intpr[(prm_0 - 0x40) / 8] >> (prm_0 % 8)) & 1) ? 0x100 : 0) : 0))) { cpu_int(prm_0); cpuinterruptbak = prm_0; } }
 
 __declspec(dllexport) void f91spimisocall(bool prm_0) { 
 	buf4rttmpx &= 0x7; if (buf4rttmpx == 0) { buf4rttmp = 0; spisr &= 0x7F; } buf4rttmp |= prm_0 << (buf4rttmpx++); if (buf4rttmpx == 8) { spisr |= 0x80; buf4rt[buf4acc++] = buf4rttmp; buf4rttmpx = 0; if (spicr & 0x80) { f91cpu_int(0x7c); } }
