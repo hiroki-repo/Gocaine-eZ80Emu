@@ -248,7 +248,6 @@ void f92_pit(void) {
 				if ((TMRx_DR[cnt] != 0) || (TMRx_CTR[cnt] & 4))
 					TMRx_DR[cnt]--;
 				if (TMRx_DR[cnt] == 0) { if (!(TMRx_CTR[cnt] & 16)) { TMRx_CTR[cnt] &= 0xFE; } TMRx_IIR[cnt] |= 1; if (TMRx_CTR[cnt] & 64) { f92cpu_int(0x0A + (cnt * 2)); } }
-				if ((TMRx_CTR[cnt] & 16) == 0) { TMRx_CTR[cnt] &= ~1; }
 				if (((TMRx_CTR[cnt] & 0x12) && (TMRx_DR[cnt] == 0))) {
 					TMRx_DR[cnt] = TMRx_RR[cnt];
 				}
