@@ -873,7 +873,7 @@ __declspec(dllexport) int cpu_execute(void) {
             cpu_prefetch_discard();
             cpu.cycles += 2;
             cpu.L = cpu.IL = cpu.ADL || cpu.MADL;
-            if (cpuadl16bitint == true) { cpu.L = false; }
+            //if (cpuadl16bitint == true) { cpu.L = false; }
             cpu.IEF1 = cpu.halted = cpu.inBlock = false;
 			intrpt->status = 0;
             if (cpu.NMI) {
@@ -887,7 +887,8 @@ __declspec(dllexport) int cpu_execute(void) {
                     if (cpu.preI && cpu.IM == 3) {
                         cpu.cycles++;
                         //cpu_call(cpu_read_word(r->I << 8 | (bus_rand() & 0xFF)), cpu.MADL);
-						cpu_call(cpu_read_word(r->I << 8 | (intvector4int & 0xFF)), cpu.MADL);
+						//cpu_call(cpu_read_word(r->I << 8 | (intvector4int & 0xFF)), cpu.MADL);
+                        cpu_call(cpu_read_word(r->I << 8 | (intvector4int & 0xFF)) & (cpuadl16bitint ? 0xffff : 0xffffff), cpu.MADL);
 					} else {
                         //cpu_call(bus_rand() & 0x38, cpu.MADL);
 						cpu_call(intvector4int & 0x38, cpu.MADL);
