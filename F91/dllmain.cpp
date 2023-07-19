@@ -885,11 +885,13 @@ __declspec(dllexport) int mac4ez80dll(int prm_0, int prm_1, int prm_2) {
 		case 0xf9:
 			if (FLASH_KEY_step >= 2) {
 				flashfdr = prm_1;
+				FLASH_KEY_step = 0;
 			}
 			break;
 		case 0xfa:
 			if (FLASH_KEY_step >= 2) {
 				flashwepr = prm_1;
+				FLASH_KEY_step = 0;
 			}
 			else {
 				flashwepr = 0xff;
